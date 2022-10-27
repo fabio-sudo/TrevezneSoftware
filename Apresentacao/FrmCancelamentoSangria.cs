@@ -80,36 +80,40 @@ namespace Apresentacao
         private void metodoIniciaFormulario()
         {
 
-            dtpDataSangria.Value = sangriaSelecionada.dataSangria;
-            sangriaLista = nSangria.BuscarSangriaParaCancelamento(sangriaSelecionada.dataSangria);
-            metodoPreencheCombobox();
 
+            metodoPreencheCombobox();
+            //ParcialVenda
             if (parcialVendaSelecionado.Count > 0) {
                 FormularioCancelado = "ParcialVenda";
+                dtpDataSangria.Value = sangriaSelecionada.dataSangria;
+                sangriaLista = nSangria.BuscarSangriaParaCancelamento(sangriaSelecionada.dataSangria);
                 AtualizarDataGridCancelamentoVendaParcial();
-                metodoValidaCalculaGrideAtualizacoes();
             }
+            //ItemVenda
             else if (itemVendaSelecionado.Count > 0) {
                 FormularioCancelado = "ItemVenda";
+                dtpDataSangria.Value = sangriaSelecionada.dataSangria;
+                sangriaLista = nSangria.BuscarSangriaParaCancelamento(sangriaSelecionada.dataSangria);
                 AtualizarDataGridCancelamentoItemVenda();
-                metodoValidaCalculaGrideAtualizacoes();
             }
+            //ItemCrediarioPago
             else if (itemCrediarioPagoSelecionado.Count > 0) {
 
                 FormularioCancelado = "ItemCrediarioPago";
                 sangriaLista = metodoSangriaCrediario(itemCrediarioPagoSelecionado);
+                //ERRO
                 AtualizarDataGridCancelamentoItemCrediarioPago();
-                metodoValidaCalculaGrideAtualizacoes();
-                //Sangria deve mostrar apenas formas de pagamento que devem ser atualizadas no gride
             }
 
+            //Atualiza o gride
             AtualizarDataGrid();         
-            dgvSangria.Focus();
+            //Calcula totais
             metodoCalculaTotais();
-            //Fazer um método para percorrer o gride e verficar quais valores devem ser atualizado
-            //Caso não consiga fazer o mesmo no gride
-            metodoAtualizaCancelamentoGrid();
-        }
+            //Percorre o gride verificando os valores
+            metodoValidaCalculaGrideAtualizacoes();
+            //Passa o Focu pro DataGrideSangria
+            dgvSangria.Focus();
+           }
 
         private void AtualizarDataGrid()
         {
@@ -166,40 +170,74 @@ namespace Apresentacao
         }
 
         //Método Adiciona a lista de sangria os Valores De acordo com as datas de cancelamento
+        //Remove Items do Crediario que não tem Sangria no dia do cancelamento 
         public SangriaLista metodoSangriaCrediario(ItemCrediarioLista lista)
         {
-            sangriaLista = new SangriaLista();
-
-
-            int contador = 0;
-            foreach (ItemCrediario item in lista)
+            try
             {
-                if (sangriaLista.Count == 0)
-                {
+                sangriaLista = new SangriaLista();
+                ItemCrediarioLista ItensRemovidos = new ItemCrediarioLista();
 
-                    sangriaLista = nSangria.BuscarSangriaParaCancelamento(item.dataItemCrediario);
-                }
-                else if (item.dataItemCrediario != sangriaLista[contador].dataSangria)
+                int contador = 0;
+                foreach (ItemCrediario item in lista)
                 {
-                    //Toda vez que a data for diferente busca os itens do caixa 
-                    //E os adiciona na lista antiga
-                    SangriaLista sangriaListaNova = new SangriaLista();
-                    sangriaListaNova = nSangria.BuscarSangriaParaCancelamento(item.dataItemCrediario);
-
-                    foreach (Sangria sangAdd in sangriaListaNova)
+                    if (sangriaLista.Count == 0)
                     {
 
-                        sangriaLista.Add(sangAdd);
+                        sangriaLista = nSangria.BuscarSangriaParaCancelamento(item.dataItemCrediario);
+                    }
+                    else if (item.dataItemCrediario != sangriaLista[contador].dataSangria)
+                    {
+                        //Toda vez que a data for diferente busca os itens do caixa 
+                        //E os adiciona na lista antiga
+                        SangriaLista sangriaListaNova = new SangriaLista();
+                        sangriaListaNova = nSangria.BuscarSangriaParaCancelamento(item.dataItemCrediario);
+                        //Se não houver sangria o item não é adicionado
+                        if (sangriaListaNova.Count > 0)
+                        {
+                            foreach (Sangria sangAdd in sangriaListaNova)
+                            {
+
+                                sangriaLista.Add(sangAdd);
+
+                            }
+                        }
+                        //Remove o item da lista Pois não sangria referente ao item
+                        else
+                        {
+
+                            foreach (ItemCrediario itemRemove in itemCrediarioPagoSelecionado)
+                            {
+                                //Verifica se os itens são iguais e remove os mesmo da lista a atualizar
+                                if (item == itemRemove)
+                                {
+
+                                    ItensRemovidos.Add(itemRemove);
+                                    break;
+                                }
+
+                            }
+                        }
 
                     }
 
                 }
 
+                //Remove itens da lista que não tem Sangria 
+                if (ItensRemovidos.Count > 0)
+                {
+
+                    foreach (ItemCrediario itemRemove in ItensRemovidos)
+                    {
+                        itemCrediarioPagoSelecionado.Remove(itemRemove);
+                    }
+                }
+
+                return sangriaLista;
+
             }
 
-            return sangriaLista;
-
-
+            catch (Exception ex) { MessageBox.Show(ex.Message); return null; }
         }
        
         //ITEMVENDA
@@ -654,13 +692,6 @@ namespace Apresentacao
         }
 
         //Percorre os grides para validar os valores que devem ser atualizados na sangria
-        //Testar
-        //testar
-        //testar
-        //testar
-        //testar
-        //testar
-        //testar
         private void metodoValidaCalculaGrideAtualizacoes() {
             
             double valorCanceladoAtualizar = 0;
@@ -676,7 +707,7 @@ namespace Apresentacao
                 foreach (DataGridViewRow colSangria in dgvSangria.Rows)
                 {
                     if (colCaixa.Cells[0].Value.ToString() == colSangria.Cells[6].Value.ToString() &&
-                    colCaixa.Cells[4].Value == colSangria.Cells[10].Value)
+                    Convert.ToDateTime(colCaixa.Cells[4].Value) == Convert.ToDateTime(colSangria.Cells[10].Value))
                     {
                         valorCanceladoAtualizar = valorCanceladoAtualizar + Convert.ToDouble(colSangria.Cells[1].Value);
                     }
