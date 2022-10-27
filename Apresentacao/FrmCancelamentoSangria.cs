@@ -101,7 +101,6 @@ namespace Apresentacao
 
                 FormularioCancelado = "ItemCrediarioPago";
                 sangriaLista = metodoSangriaCrediario(itemCrediarioPagoSelecionado);
-                //ERRO
                 AtualizarDataGridCancelamentoItemCrediarioPago();
             }
 
@@ -407,7 +406,10 @@ namespace Apresentacao
             catch (Exception ex) { MessageBox.Show(ex.Message); }
         }
 
-        //ItemCrediarioPago
+        //ItemCrediarioPago Itens Duplicados
+        //erro
+        //erro
+        //erro
         private void AtualizarDataGridCancelamentoItemCrediarioPago() {
             try
             {
@@ -440,8 +442,8 @@ namespace Apresentacao
 
                             sangriaCancelada.valorSangria = item.quantidadeItemCrediario * item.valorItemCrediario;
                             sangriaCancelada.retiradaSangria = item.quantidadeItemCrediario * item.valorItemCrediario;
-                            sangriaCancelada.pagamentoSangria.codigoFormaPagamento = item.Venda.formaPagamento.codigoFormaPagamento;
-                            sangriaCancelada.pagamentoSangria.formaPagamento = item.Venda.formaPagamento.formaPagamento;
+                            sangriaCancelada.pagamentoSangria.codigoFormaPagamento = item.formaPagamento.codigoFormaPagamento;
+                            sangriaCancelada.pagamentoSangria.formaPagamento = item.formaPagamento.formaPagamento;
                             sangriaCancelada.dataSangria = item.dataItemCrediario;
                             listaSangriaCancelada.Add(sangriaCancelada);
 
@@ -455,8 +457,8 @@ namespace Apresentacao
                         sangriaCancelada.pagamentoSangria = new FormaPagamento();
 
                         sangriaCancelada.valorSangria = item.quantidadeItemCrediario * item.valorItemCrediario;
-                        sangriaCancelada.pagamentoSangria.codigoFormaPagamento = item.Venda.formaPagamento.codigoFormaPagamento;
-                        sangriaCancelada.pagamentoSangria.formaPagamento = item.Venda.formaPagamento.formaPagamento;
+                        sangriaCancelada.pagamentoSangria.codigoFormaPagamento = item.formaPagamento.codigoFormaPagamento;
+                        sangriaCancelada.pagamentoSangria.formaPagamento = item.formaPagamento.formaPagamento;
                         sangriaCancelada.retiradaSangria = item.quantidadeItemCrediario * item.valorItemCrediario;
                         sangriaCancelada.dataSangria = item.dataItemCrediario;
                         listaSangriaCancelada.Add(sangriaCancelada);
